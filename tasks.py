@@ -630,7 +630,7 @@ def check_migrations(context):
 )
 def unittest(
     context,
-    keepdb=False,
+    keepdb=True,
     label="nautobot_version_control",
     failfast=False,
     buffer=True,
@@ -651,6 +651,9 @@ def unittest(
     if verbose:
         command += " --verbosity 2"
 
+    if not keepdb:
+        raise RuntimeError("The nautobot-version-control unittests require the --keepdb flag to function properly.")
+
     run_command(context, command)
 
 
@@ -669,7 +672,7 @@ def unittest_coverage(context):
         "lint-only": "Only run linters; unit tests will be excluded. (default: False)",
     }
 )
-def tests(context, failfast=False, keepdb=False, lint_only=False):
+def tests(context, failfast=False, keepdb=True, lint_only=False):
     """Run all tests for this app."""
     # If we are not running locally, start the docker containers so we don't have to for each test
     if not is_truthy(context.nautobot_version_control.local):
