@@ -1,7 +1,6 @@
 """Injection of branch information banner via the Plugins API."""
 
 from django.utils.html import format_html
-
 from nautobot.extras.choices import BannerClassChoices
 from nautobot.extras.plugins import PluginBanner
 

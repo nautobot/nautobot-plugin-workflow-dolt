@@ -51,7 +51,7 @@ def active_branch():
 def db_for_commit(commit):
     """Uses "database-revision" syntax adds a database entry for the commit e.g. "nautobot/3a5mqdgao8029bf8ji0huobbskq1n1l5"."""
     cm_hash = str(commit)
-    if len(cm_hash) != 32:
+    if len(cm_hash) != 32:  # noqa: PLR2004
         raise Exception("commit hash length is incorrect")  # pylint: disable=broad-exception-raised  # TODO
     database = deepcopy(connections.databases["default"])
     database["id"] = cm_hash

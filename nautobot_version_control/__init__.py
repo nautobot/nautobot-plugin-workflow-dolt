@@ -4,8 +4,7 @@
 from importlib import metadata
 
 import django_tables2
-from django.db.models.signals import post_migrate
-from django.db.models.signals import pre_migrate
+from django.db.models.signals import post_migrate, pre_migrate
 from nautobot.apps import NautobotAppConfig
 
 from nautobot_version_control.migrations import auto_dolt_commit_migration
@@ -237,17 +236,17 @@ __GLOBAL_ROUTER_SWITCH__ = True
 
 def is_global_router_enabled():
     """Returns true if the __GLOBAL_ROUTER_SWITCH__ is turned on."""
-    global __GLOBAL_ROUTER_SWITCH__  # pylint: disable=W0602
+    global __GLOBAL_ROUTER_SWITCH__  # pylint: disable=W0602  # noqa: PLW0602
     return __GLOBAL_ROUTER_SWITCH__
 
 
 def switch_global_router_on(**kwargs):
     """Sets __GLOBAL_ROUTER_SWITCH to true."""
-    global __GLOBAL_ROUTER_SWITCH__  # pylint: disable=global-statement
+    global __GLOBAL_ROUTER_SWITCH__  # pylint: disable=global-statement  # noqa: PLW0603
     __GLOBAL_ROUTER_SWITCH__ = True
 
 
 def switch_global_router_off(**kwargs):
     """Sets __GLOBAL_ROUTER_SWITCH to false."""
-    global __GLOBAL_ROUTER_SWITCH__  # pylint: disable=global-statement
+    global __GLOBAL_ROUTER_SWITCH__  # pylint: disable=global-statement  # noqa: PLW0603
     __GLOBAL_ROUTER_SWITCH__ = False

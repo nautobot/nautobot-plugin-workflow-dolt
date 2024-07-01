@@ -1,25 +1,23 @@
 """Implements django views for all Version Control plugin features."""
 
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, get_list_or_404, render, redirect
+from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from django.views import View
-
-from nautobot.core.views import generic
-from nautobot.dcim.models.locations import Location
 from nautobot.core.forms import ConfirmationForm
 from nautobot.core.utils.permissions import get_permission_for_model
+from nautobot.core.views import generic
 from nautobot.core.views.mixins import GetReturnURLMixin, ObjectPermissionRequiredMixin
+from nautobot.dcim.models.locations import Location
 
 from nautobot_version_control import diffs, filters, forms, merge, tables
 from nautobot_version_control.constants import DOLT_DEFAULT_BRANCH
-from nautobot_version_control.utils import alter_session_branch, db_for_commit, active_branch
 from nautobot_version_control.models import (
     Branch,
     BranchMeta,
@@ -28,6 +26,7 @@ from nautobot_version_control.models import (
     PullRequest,
     PullRequestReview,
 )
+from nautobot_version_control.utils import active_branch, alter_session_branch, db_for_commit
 
 
 class DoltObjectView(generic.ObjectView):
@@ -210,7 +209,7 @@ class BranchBulkDeleteView(generic.BulkDeleteView):
                     deleted_count = queryset.delete()[1][model._meta.label]
                 except Exception as err:  # pylint: disable=broad-except
                     logger.info("Caught error while attempting to delete objects")
-                    messages.error(request, mark_safe(err))
+                    messages.error(request, format_html("{}", err))
                     return redirect(self.get_return_url(request))
 
                 msg = f"Deleted {deleted_count} {model._meta.verbose_name_plural}"
@@ -314,7 +313,7 @@ class BranchMergePreView(GetReturnURLMixin, View):
     def post(self, request, *args, **kwargs):  # pylint: disable=W0613,C0116 # noqa: D102
         src, dest = kwargs["src"], kwargs["dest"]
         Branch.objects.get(name=dest).merge(src, user=request.user)
-        messages.info(request, mark_safe(f"<h4>merged branch <b>{src}</b> into <b>{dest}</b></h4>"))
+        messages.info(request, format_html("<h4>merged branch <b>{}</b> into <b>{}</b></h4>", src, dest))
         alter_session_branch(sess=request.session, branch=dest)
         return redirect("/")
 
@@ -421,10 +420,10 @@ class CommitRevertView(GetReturnURLMixin, ObjectPermissionRequiredMixin, View):
             missing = [f"<strong>{h}</strong>" for h in pk_list if h not in found]
             messages.warning(
                 request,
-                mark_safe(
-                    f"""Cannot revert commit(s) {", ".join(missing)},
-                        commits were not found on branch
-                        <strong>{active_branch()}</strong>"""
+                format_html(
+                    "Cannot revert commit(s) {}, commits were not found on branch <strong>{}</strong>",
+                    ", ".join(missing),
+                    active_branch(),
                 ),
             )
             return redirect(self.get_return_url(request))
@@ -450,7 +449,7 @@ class CommitRevertView(GetReturnURLMixin, ObjectPermissionRequiredMixin, View):
             form = self.form(request.POST)
             if form.is_valid():
                 commits = form.cleaned_data["pk"]
-                msgs = [f"""<strong>"{c.short_message}"</strong>""" for c in commits]
+                msgs = [format_html('<strong>"{}"</strong>', c.short_message) for c in commits]
                 # pylint: disable=no-else-return
                 try:
                     _ = Commit.revert(commits, request.user)
@@ -458,13 +457,13 @@ class CommitRevertView(GetReturnURLMixin, ObjectPermissionRequiredMixin, View):
                     # catch database error
                     messages.error(
                         request,
-                        mark_safe(f"""Error reverting commits {", ".join(msgs)}: {err}"""),
+                        format_html("Error reverting commits {}: {}", ", ".join(msgs), err),
                     )
                     return redirect(self.get_return_url(request))
 
                 messages.success(
                     request,
-                    mark_safe(f"""Successfully reverted commits {", ".join(msgs)}"""),
+                    format_html("Successfully reverted commits {}", ", ".join(msgs)),
                 )
 
         return redirect(self.get_return_url(request))
@@ -542,11 +541,11 @@ class DiffDetailView(View):
         if Branch.objects.filter(hash=str(commit)).count() == 1:
             branch_obj = Branch.objects.get(hash=str(commit))
             url = branch_obj.get_absolute_url()
-            return mark_safe(f"<a href='{url}'>{branch_obj}</a>")
+            return format_html('<a href="{}">{}</a>', url, branch_obj)
         if Commit.objects.filter(commit_hash=str(commit)).exists():
             commit_obj = Commit.objects.get(commit_hash=str(commit))
             url = commit_obj.get_absolute_url()
-            return mark_safe(f"<a href='{url}'>{commit_obj}</a>")
+            return format_html('<a href="{}">{}</a>', url, commit_obj)
         return commit
 
     def display_name(self, kwargs):
@@ -815,7 +814,7 @@ class PullRequestMergeView(generic.ObjectEditView):
     def get(self, request, pk):  # pylint: disable=W0613,C0116,W0221 # noqa: D102
         pull_request = get_object_or_404(self.queryset, pk=pk)
         if pull_request.state != PullRequest.OPEN:
-            msg = mark_safe(f"""Pull request "{pull_request}" is not open and cannot be merged""")
+            msg = format_html('Pull request "{}" is not open and cannot be merged', pull_request)
             messages.error(request, msg)
             return redirect("plugins:nautobot_version_control:pull_request", pk=pull_request.pk)
         src = Branch.objects.get(name=pull_request.source_branch)
@@ -843,7 +842,7 @@ class PullRequestMergeView(generic.ObjectEditView):
             pull_request.merge(user=request.user, squash=squash_param)
             messages.success(
                 request,
-                mark_safe(f"""Pull Request <strong>"{pull_request}"</strong> has been merged."""),
+                format_html('Pull Request <strong>"{}"</strong> has been merged.', pull_request),
             )
             return redirect("plugins:nautobot_version_control:pull_request", pk=pull_request.pk)
 
@@ -868,7 +867,7 @@ class PullRequestCloseView(generic.ObjectEditView):
     def get(self, request, pk):  # pylint: disable=W0613,C0116,W0221 # noqa: D102
         pull_request = get_object_or_404(self.queryset, pk=pk)
         if pull_request.state != PullRequest.OPEN:
-            msg = mark_safe(f"""Pull request "{pull_request}" is not open and cannot be closed""")
+            msg = format_html('Pull request "{}" is not open and cannot be closed', pull_request)
             messages.error(request, msg)
             return redirect("plugins:nautobot_version_control:pull_request", pk=pull_request.pk)
 
@@ -891,7 +890,7 @@ class PullRequestCloseView(generic.ObjectEditView):
         if form.is_valid():
             pull_request.state = PullRequest.CLOSED
             pull_request.save()
-            msg = mark_safe(f"""<strong>Pull Request "{pull_request}" has been closed.</strong>""")
+            msg = format_html('<strong>Pull Request "{}" has been closed.</strong>', pull_request)
             messages.success(request, msg)
             return redirect("plugins:nautobot_version_control:pull_request", pk=pull_request.pk)
 

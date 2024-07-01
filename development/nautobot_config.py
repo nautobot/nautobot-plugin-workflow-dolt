@@ -19,9 +19,9 @@ if DEBUG and not _TESTING:
     if "debug_toolbar" not in INSTALLED_APPS:  # noqa: F405
         INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
     if (
-        "debug_toolbar.middleware.DebugToolbarMiddleware" not in MIDDLEWARE
+        "debug_toolbar.middleware.DebugToolbarMiddleware" not in MIDDLEWARE  # noqa: F405
     ):  # noqa: F405
-        MIDDLEWARE.insert(
+        MIDDLEWARE.insert(  # noqa: F405
             0, "debug_toolbar.middleware.DebugToolbarMiddleware"
         )  # noqa: F405
 
@@ -47,13 +47,8 @@ DATABASES = {
         "USER": os.getenv("NAUTOBOT_DB_USER", ""),  # Database username
         "PASSWORD": os.getenv("NAUTOBOT_DB_PASSWORD", ""),  # Database password
         "HOST": os.getenv("NAUTOBOT_DB_HOST", "localhost"),  # Database server
-        "PORT": os.getenv(
-            "NAUTOBOT_DB_PORT",
-            default_db_settings[nautobot_db_engine]["NAUTOBOT_DB_PORT"],
-        ),  # Database port, default to postgres
-        "CONN_MAX_AGE": int(
-            os.getenv("NAUTOBOT_DB_TIMEOUT", "300")
-        ),  # Database timeout
+        "PORT": os.getenv("NAUTOBOT_DB_PORT", "3306"),  # Database port
+        "CONN_MAX_AGE": int(os.getenv("NAUTOBOT_DB_TIMEOUT", "300")),  # Database timeout
         "ENGINE": nautobot_db_engine,
         "OPTIONS": {"charset": "utf8mb4"},
     },
@@ -63,7 +58,7 @@ DATABASES = {
         "PASSWORD": os.getenv("NAUTOBOT_DB_PASSWORD", ""),  # Database password
         "HOST": os.getenv("NAUTOBOT_DB_HOST", "localhost"),  # Database server
         "PORT": os.getenv("NAUTOBOT_DB_PORT", "3306"),  # Database port
-        "CONN_MAX_AGE": int(os.getenv("NAUTOBOT_DB_TIMEOUT", 300)),  # Database timeout
+        "CONN_MAX_AGE": int(os.getenv("NAUTOBOT_DB_TIMEOUT", "300")),  # Database timeout
         "ENGINE": nautobot_db_engine,
         "OPTIONS": {"charset": "utf8mb4"},
         "TEST": {

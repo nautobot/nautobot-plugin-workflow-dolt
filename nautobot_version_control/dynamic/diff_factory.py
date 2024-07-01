@@ -2,13 +2,12 @@
 
 import copy
 
+import django_tables2 as tables
 from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
-
-import django_tables2 as tables
 from django_tables2.utils import call_with_appropriate
 
 from nautobot_version_control import diff_table_for_model
@@ -160,7 +159,7 @@ class DiffListViewBase(tables.Table):
     def wrap_render_func(func):
         """Wraps an existing cell rendering function with diff styling."""
 
-        def render_before_after_diff(value, record, column, bound_column, bound_row, table):  # pylint: disable=R0913
+        def render_before_after_diff(value, record, column, bound_column, bound_row, table):  # pylint: disable=R0913  # noqa: PLR0913
             # the previous render function may take any of the
             # following args, so provide them all
             kwargs = {

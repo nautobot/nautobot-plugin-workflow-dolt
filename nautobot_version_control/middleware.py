@@ -5,8 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import m2m_changed, post_save, pre_delete
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.utils.safestring import mark_safe
-
+from django.utils.html import format_html
 from nautobot.extras.models.change_logging import ObjectChange
 
 from nautobot_version_control.constants import (
@@ -53,13 +52,13 @@ class DoltBranchMiddleware:
         try:
             branch.checkout()
         except Exception as err:  # pylint: disable=broad-except
-            msg = f"could not checkout branch {branch}: {str(err)}"
-            messages.error(request, mark_safe(msg))
+            msg = "could not checkout branch {}: {}"
+            messages.error(request, format_html(msg, branch, err))
 
         try:
             return view_func(request, *view_args, **view_kwargs)
         except DoltError as err:
-            messages.error(request, mark_safe(err))
+            messages.error(request, format_html("{}", err))
             return redirect(request.path)
 
     @staticmethod
@@ -72,7 +71,7 @@ class DoltBranchMiddleware:
         except ObjectDoesNotExist:
             messages.warning(
                 request,
-                mark_safe(f"""<div class="text-center">branch not found: {requested}</div>"""),  # nosec
+                format_html('<div class="text-center">branch not found: {}</div>', requested),
             )
             request.session[DOLT_BRANCH_KEYWORD] = DOLT_DEFAULT_BRANCH
             return Branch.objects.get(pk=DOLT_DEFAULT_BRANCH)

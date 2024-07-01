@@ -4,12 +4,12 @@
 
 import django_tables2 as tables
 from django_tables2 import A
-from nautobot.core.tables import BaseTable, ToggleColumn, ButtonsColumn
+from nautobot.core.tables import BaseTable, ButtonsColumn, ToggleColumn
 
 from nautobot_version_control.models import (
     Branch,
-    Conflicts,
     Commit,
+    Conflicts,
     PullRequest,
 )
 
