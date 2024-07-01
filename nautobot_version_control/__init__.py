@@ -1,11 +1,13 @@
 """Plugin declaration for nautobot_version_control."""
+
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
+from importlib import metadata
+
 from django.db.models.signals import pre_migrate, post_migrate
 import django_tables2
 from nautobot.extras.plugins import PluginConfig
 from nautobot_version_control.migrations import auto_dolt_commit_migration
 
-from importlib import metadata
 
 __version__ = metadata.version(__name__)
 

@@ -1,4 +1,5 @@
 """Django Tables2 classes for version_control plugin."""
+
 # pylint: disable=too-few-public-methods
 
 import django_tables2 as tables

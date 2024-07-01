@@ -49,7 +49,9 @@ class DoltObjectView(generic.ObjectView):
         # TODO: similar functionality probably needed in NautobotUIViewSet as well, not currently present
         if request.GET.get("viewconfig", None) == "true":
             # TODO: we shouldn't be importing a private-named function from another module. Should it be renamed?
-            from nautobot.extras.templatetags.plugins import _get_registered_content
+            from nautobot.extras.templatetags.plugins import (  # pylint: disable=import-outside-toplevel  # TODO
+                _get_registered_content,
+            )
 
             temp_fake_context = {
                 "object": instance,
@@ -62,19 +64,19 @@ class DoltObjectView(generic.ObjectView):
             plugin_tabs = _get_registered_content(instance, "detail_tabs", temp_fake_context, return_html=False)
             resp = {"tabs": plugin_tabs}
             return JsonResponse(resp)
-        else:
-            return render(
-                request,
-                self.get_template_name(),
-                {
-                    "object": instance,
-                    "verbose_name": self.queryset.model._meta.verbose_name,
-                    "verbose_name_plural": self.queryset.model._meta.verbose_name_plural,
-                    "created_by": created_by,
-                    "last_updated_by": last_updated_by,
-                    **self.get_extra_context(request, instance),
-                },
-            )
+
+        return render(
+            request,
+            self.get_template_name(),
+            {
+                "object": instance,
+                "verbose_name": self.queryset.model._meta.verbose_name,
+                "verbose_name_plural": self.queryset.model._meta.verbose_name_plural,
+                "created_by": created_by,
+                "last_updated_by": last_updated_by,
+                **self.get_extra_context(request, instance),
+            },
+        )
 
 
 #
@@ -315,7 +317,7 @@ class BranchMergePreView(GetReturnURLMixin, View):
         alter_session_branch(sess=request.session, branch=dest)
         return redirect("/")
 
-    def get_extra_context(self, request, src, dest):  # pylint: disable=W0613,C0116,R0201 # noqa: D102
+    def get_extra_context(self, request, src, dest):  # pylint: disable=W0613,C0116 # noqa: D102
         merge_base_c = Commit.merge_base(src, dest)
         source_head = src.hash
         return {
@@ -457,11 +459,11 @@ class CommitRevertView(GetReturnURLMixin, ObjectPermissionRequiredMixin, View):
                         mark_safe(f"""Error reverting commits {", ".join(msgs)}: {err}"""),
                     )
                     return redirect(self.get_return_url(request))
-                else:
-                    messages.success(
-                        request,
-                        mark_safe(f"""Successfully reverted commits {", ".join(msgs)}"""),
-                    )
+
+                messages.success(
+                    request,
+                    mark_safe(f"""Successfully reverted commits {", ".join(msgs)}"""),
+                )
 
         return redirect(self.get_return_url(request))
 
@@ -490,7 +492,7 @@ class DiffDetailView(View):
 
     template_name = "nautobot_version_control/diff_detail.html"
 
-    def get_required_permission(self):  # pylint: disable=R0201
+    def get_required_permission(self):
         """Returns permissions."""
         return get_permission_for_model(Location, "view")  # TODO: what is this doing?
 
@@ -508,7 +510,7 @@ class DiffDetailView(View):
             },
         )
 
-    def get_model(self, kwargs):  # pylint: disable=no-self-use
+    def get_model(self, kwargs):
         """Returns the underlying model."""
         return ContentType.objects.get(app_label=kwargs["app_label"], model=kwargs["model"]).model_class()
 
