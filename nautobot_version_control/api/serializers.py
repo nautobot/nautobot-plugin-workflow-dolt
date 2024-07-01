@@ -1,4 +1,5 @@
 """Serializers for version_control app."""
+
 from rest_framework import serializers
 from nautobot_version_control.models import Branch, Commit, PullRequest, PullRequestReview
 

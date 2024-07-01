@@ -1,6 +1,5 @@
 """Dolt primitives such as branches and commits as Django models."""
 
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, connection, connections
 from django.db.models import Q
@@ -41,7 +40,7 @@ class DoltSystemTable(models.Model):
 #
 
 
-class Branch(DoltSystemTable):
+class Branch(DoltSystemTable):  # pylint: disable=nb-incorrect-base-class  # TODO
     """Branch represents a model over the dolt_branches system table."""
 
     name = models.TextField(primary_key=True)
@@ -164,7 +163,7 @@ class Branch(DoltSystemTable):
             res = cursor.fetchone()
             # dolt_merge returns a signature that is at the time of this writing:
             # ws, h.String(), noConflictsOrViolations, fastForwardMerge, str, nil
-            # test the noConflictsOrViolations and fastForwardMerge is good 
+            # test the noConflictsOrViolations and fastForwardMerge is good
             if res[1] == 0 and res[2] == 0:  # magic???
                 # only commit merged data on success
                 msg = f"""merged "{merge_branch}" into "{self.name}"."""
@@ -219,10 +218,12 @@ def delete_branch_pre_hook(sender, instance, using, **kwargs):  # pylint: disabl
         pr_list = ",".join([f'"{pr}"' for pr in prs])
         raise DoltError(f"Must delete existing pull request(s): [{pr_list}] before deleting branch {instance.name}")
 
-    raise Exception("QuerySet deletion of Branch is not supported, please delete the items individually")
+    raise Exception(  # pylint: disable=broad-exception-raised  # TODO
+        "QuerySet deletion of Branch is not supported, please delete the items individually"
+    )
 
 
-class BranchMeta(models.Model):
+class BranchMeta(models.Model):  # pylint: disable=nb-incorrect-base-class  # TODO
     """
     BranchMeta class has a 1:1 relation with a Branch.
 
@@ -246,7 +247,7 @@ class BranchMeta(models.Model):
 #
 
 
-class Commit(DoltSystemTable):
+class Commit(DoltSystemTable):  # pylint: disable=nb-incorrect-base-class  # TODO
     """Commit represents a Dolt Commit primitive."""
 
     commit_hash = models.TextField(primary_key=True)
@@ -321,7 +322,7 @@ class Commit(DoltSystemTable):
             )
 
 
-class CommitAncestor(DoltSystemTable):
+class CommitAncestor(DoltSystemTable):  # pylint: disable=nb-incorrect-base-class  # TODO
     """CommitAncestor models the set of ancestors or parents that precede a Commit."""
 
     commit_hash = models.TextField(primary_key=True)
@@ -350,7 +351,7 @@ class CommitAncestor(DoltSystemTable):
 #
 
 
-class Conflicts(DoltSystemTable):
+class Conflicts(DoltSystemTable):  # pylint: disable=nb-incorrect-base-class  # TODO
     """Conflicts represents the dolt_conflicts system table and the conflicts from a merge it contains."""
 
     table = models.TextField(primary_key=True)
@@ -368,7 +369,7 @@ class Conflicts(DoltSystemTable):
         return f"{self.table} ({self.num_conflicts})"
 
 
-class ConstraintViolations(DoltSystemTable):
+class ConstraintViolations(DoltSystemTable):  # pylint: disable=nb-incorrect-base-class  # TODO
     """Foreign Key and Unique Key Constraint Violations."""
 
     table = models.TextField(primary_key=True)
@@ -411,7 +412,7 @@ class PullRequest(BaseModel):
     # can't create Foreign Key to dolt_branches table :(
     source_branch = models.CharField(max_length=1024)
     destination_branch = models.CharField(max_length=1024)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)  # pylint: disable=nb-string-field-blank-null  # TODO
     creator = models.ForeignKey(User, on_delete=CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
@@ -428,7 +429,7 @@ class PullRequest(BaseModel):
         """Return a simple string if model is called."""
         return self.title
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # pylint: disable=arguments-differ  # TODO
         """Returns a url to render a view of the pull request."""
         return reverse("plugins:nautobot_version_control:pull_request", args=[self.id])
 
@@ -524,7 +525,7 @@ class PullRequestReview(BaseModel):
     reviewer = models.ForeignKey(User, on_delete=CASCADE)
     reviewed_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     state = models.IntegerField(choices=REVIEW_STATE_CHOICES, null=True)
-    summary = models.TextField(blank=True, null=True)
+    summary = models.TextField(blank=True, null=True)  # pylint: disable=nb-string-field-blank-null  # TODO
 
     class Meta:
         """Meta information for PullRequestReview model."""
@@ -537,6 +538,6 @@ class PullRequestReview(BaseModel):
         """Return a simple string if model is called."""
         return f""""{self.pull_request}" reviewed by {self.reviewer}"""
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # pylint: disable=arguments-differ  # TODO
         """Returns a link to a view of a pull request review."""
         return reverse("plugins:nautobot_version_control:pull_request", args=[self.pull_request.id])

@@ -9,7 +9,7 @@ To install the App, please follow the instructions detailed in the [Installation
 ## What are the common operations?
 
 This section describes common Git-like operations that the Version Control app enables on the Nautobot database.
-It is recommended to read these prior to reading the [common workflows](workflows/common_workflows.md) section.
+It is recommended to read these prior to reading the [use cases](app_use_cases.md) section.
 
 ### Branches  
 
