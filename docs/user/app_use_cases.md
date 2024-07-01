@@ -1,6 +1,6 @@
 # Using the App
 
-This section covers some common workflows. It is recommended to review the [getting started](../app_getting_started.md) section prior to this section.
+This section covers some common workflows. It is recommended to review the [getting started](app_getting_started.md) section prior to this section.
 
 ## Proposing Data Changes
 
@@ -71,9 +71,9 @@ The example below shows that the `bkk-leaf-08` status changed from `Active` to `
 
 ### Viewing Branch Commits
 
-To view commits in a given branch, [activate the branch](../version-control-operations.md#switching-branches) with the commits you are interested in. 
+To view commits in a given branch, [activate the branch](app_getting_started.md#switching-branches) with the commits you are interested in. 
 
-See the [Commits documentation](../version-control-operations.md#commits) to learn how to view commits in the selected branch. 
+See the [Commits documentation](app_getting_started.md#commits) to learn how to view commits in the selected branch. 
 
 ## The Pull Request (PR) Process
 
@@ -91,7 +91,7 @@ Once on the *Add a new pull request* screen, fill out the requested details and 
 
 ### The Pull Request (PR) Detail View
 
-Creating the PR will take you to the PR detail page, which has 4 tabs, [explained here](../version-control-operations.md#pull-request-view).
+Creating the PR will take you to the PR detail page, which has 4 tabs, [explained here](app_getting_started.md#pull-request-view).
 
 ### Reviewing a PR 
 
@@ -102,7 +102,7 @@ To review a PR, go to *Version Control --> Pull Requests*.
 This will take you to the pull requests list page; once there:
 
 * Determine which PR you want to review and its source branch
-* [Switch the active branch](../version-control-operations.md#switching-branches) to that of the PR source branch (this is necessary if you wish to revert any changes in the PR)
+* [Switch the active branch](app_getting_started.md#switching-branches) to that of the PR source branch (this is necessary if you wish to revert any changes in the PR)
 * Navigate back to the PR list page and click on the desired PR
 
 ![](../images/pr-list-page.png)
@@ -114,7 +114,7 @@ Here, you can start a conversation around the PR, including any questions or com
 
 Each review can be a *Comment*, *Approval*, or *Blocked* operation. 
 Once the PR is moved to *Approved* status, a *Merge* button appears, allowing the reviewer to merge the changes into the destination branch.
-For more information on merges, see version control operations [section on merges](../version-control-operations.md#merges).
+For more information on merges, see version control operations [section on merges](app_getting_started.md#merges).
 
 ![](../images/pr-review-conversation.png)
 
@@ -135,10 +135,10 @@ Should a conflict come up, you can do the following:
 
 ![](../images/view-conflict.png)
 
-At this point you can either [revert the specific commit](../version-control-operations.md#reverting-a-commit) in your PR or modify the other branch with the conflict (the `main` branch in this example).
+At this point you can either [revert the specific commit](app_getting_started.md#reverting-a-commit) in your PR or modify the other branch with the conflict (the `main` branch in this example).
 
 
 ## Reverting Commits
 
 At any point during the process of making changes in a branch, reviewing a PR for the changes in a branch, or trying to revert changes already in the main (production) branch, you may want to revert specific commits or revert commits en masse. 
-View how to revert commits [here](../version-control-operations.md#reverting-a-commit).
+View how to revert commits [here](app_getting_started.md#reverting-a-commit).

@@ -1,6 +1,5 @@
 """Utility methods used throughout the plugin."""
 
-
 from contextlib import contextmanager
 from copy import deepcopy
 
@@ -20,7 +19,7 @@ def author_from_user(user):
 
     Note that while user.email is optional in Django, it's mandatory for Dolt.
     """
-    if user:
+    if user and user.is_authenticated:
         if user.email:
             return f"{user.username} <{user.email}>"
         # RFC 6761 defines .invalid as a reserved TLD that will never be used for real-world domains
@@ -53,8 +52,7 @@ def db_for_commit(commit):
     """Uses "database-revision" syntax adds a database entry for the commit e.g. "nautobot/3a5mqdgao8029bf8ji0huobbskq1n1l5"."""
     cm_hash = str(commit)
     if len(cm_hash) != 32:
-        # pylint: disable=broad-exception-raised
-        raise Exception("commit hash length is incorrect")
+        raise Exception("commit hash length is incorrect")  # pylint: disable=broad-exception-raised  # TODO
     database = deepcopy(connections.databases["default"])
     database["id"] = cm_hash
     database["NAME"] = f"{DB_NAME}/{cm_hash}"

@@ -1,4 +1,5 @@
 """tests.py contains unittests for the nautobot version control plugin."""
+
 # pylint: disable=too-many-ancestors
 
 from django.test import override_settings, TransactionTestCase
@@ -53,6 +54,8 @@ class TestBranches(DoltTestCase):
 
     def tearDown(self):
         """tearDown is ran after every testcase."""
+        main = Branch.objects.get(name=self.default)
+        main.checkout()
         # Branch QuerySet deletes are not supported, delete branches individually.
         for branch in Branch.objects.exclude(name=self.default):
             branch.delete()
@@ -110,7 +113,7 @@ class TestBranches(DoltTestCase):
         # Checkout to the other branch and make a change
         other.checkout()
         Manufacturer.objects.all().delete()
-        Manufacturer.objects.create(name="m1", slug="m-1")
+        Manufacturer.objects.create(name="m1")
         Commit(message="added a manufacturer").save(user=self.user_no_email)
 
         commit = Commit.objects.order_by("date").last()
@@ -125,7 +128,7 @@ class TestBranches(DoltTestCase):
             self.assertFalse(cursor.fetchone()[0] is None)
 
         # Verify the the main branch has the data
-        self.assertEqual(Manufacturer.objects.filter(name="m1", slug="m-1").count(), 1)
+        self.assertEqual(Manufacturer.objects.filter(name="m1").count(), 1)
 
     def test_merge_no_ff(self):
         """test_merge_no_ff tests whether a non-ff merge works."""
@@ -134,12 +137,12 @@ class TestBranches(DoltTestCase):
         other = Branch.objects.get(name="noff")
 
         # # Create a change on main
-        Manufacturer.objects.create(name="m2", slug="m-2")
+        Manufacturer.objects.create(name="m2")
         Commit(message="commit m2").save(user=self.user)
 
         # Checkout to the other branch and make a change
         other.checkout()
-        Manufacturer.objects.create(name="m3", slug="m-3")
+        Manufacturer.objects.create(name="m3")
         Commit(message="commit m3").save(user=self.user_no_email)
 
         # Now do a merge
@@ -150,27 +153,27 @@ class TestBranches(DoltTestCase):
             self.assertFalse(cursor.fetchone()[0] is None)
 
         # Verify the the main branch has the data
-        self.assertEqual(Manufacturer.objects.filter(name="m2", slug="m-2").count(), 1)
-        self.assertEqual(Manufacturer.objects.filter(name="m3", slug="m-3").count(), 1)
+        self.assertEqual(Manufacturer.objects.filter(name="m2").count(), 1)
+        self.assertEqual(Manufacturer.objects.filter(name="m3").count(), 1)
 
     def test_merge_conflicts(self):
         """test_merge_conflicts tests whether a merge with conflicts is detected and errors."""
         main = Branch.objects.get(name=self.default)
         Manufacturer.objects.all().delete()
-        Manufacturer.objects.create(name="m2", slug="m-2")
-        Commit(message="commit m2 with slug m-2").save(user=self.user)
+        Manufacturer.objects.create(name="m2", description="m-2")
+        Commit(message="commit m2 with description m-2").save(user=self.user)
 
         Branch(name="conflicts", starting_branch=self.default).save()
         other = Branch.objects.get(name="conflicts")
 
         # # Create a change on main
-        Manufacturer.objects.filter(name="m2", slug="m-2").update(slug="m-15")
-        Commit(message="commit m2 with slug m-15").save(user=self.user)
+        Manufacturer.objects.filter(name="m2").update(description="m-15")
+        Commit(message="commit m2 with description m-15").save(user=self.user)
 
         # Checkout to the other branch and make a change
         other.checkout()
-        Manufacturer.objects.filter(name="m2", slug="m-2").update(slug="m-16")
-        Commit(message="commit m2 with slug m-16").save(user=self.user)
+        Manufacturer.objects.filter(name="m2").update(description="m-16")
+        Commit(message="commit m2 with description m-16").save(user=self.user)
 
         # Now do a merge. It should throw an exception due to conflicts
         main.checkout()

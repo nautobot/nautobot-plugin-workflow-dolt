@@ -1,6 +1,5 @@
 """Routing for the Nautobot Version Control plugin."""
 
-
 from django.urls import path
 
 from nautobot_version_control import views

@@ -50,8 +50,9 @@ class DoltObjectView(generic.ObjectView):
         # pylint: disable=no-else-return
         if request.GET.get("viewconfig", None) == "true":
             # TODO: we shouldn't be importing a private-named function from another module. Should it be renamed?
-            # pylint: disable=import-outside-toplevel
-            from nautobot.extras.templatetags.plugins import _get_registered_content
+            from nautobot.extras.templatetags.plugins import (  # pylint: disable=import-outside-toplevel  # TODO
+                _get_registered_content,
+            )
 
             temp_fake_context = {
                 "object": instance,
@@ -64,19 +65,19 @@ class DoltObjectView(generic.ObjectView):
             plugin_tabs = _get_registered_content(instance, "detail_tabs", temp_fake_context, return_html=False)
             resp = {"tabs": plugin_tabs}
             return JsonResponse(resp)
-        else:
-            return render(
-                request,
-                self.get_template_name(),
-                {
-                    "object": instance,
-                    "verbose_name": self.queryset.model._meta.verbose_name,
-                    "verbose_name_plural": self.queryset.model._meta.verbose_name_plural,
-                    "created_by": created_by,
-                    "last_updated_by": last_updated_by,
-                    **self.get_extra_context(request, instance),
-                },
-            )
+
+        return render(
+            request,
+            self.get_template_name(),
+            {
+                "object": instance,
+                "verbose_name": self.queryset.model._meta.verbose_name,
+                "verbose_name_plural": self.queryset.model._meta.verbose_name_plural,
+                "created_by": created_by,
+                "last_updated_by": last_updated_by,
+                **self.get_extra_context(request, instance),
+            },
+        )
 
 
 #
@@ -460,11 +461,11 @@ class CommitRevertView(GetReturnURLMixin, ObjectPermissionRequiredMixin, View):
                         mark_safe(f"""Error reverting commits {", ".join(msgs)}: {err}"""),
                     )
                     return redirect(self.get_return_url(request))
-                else:
-                    messages.success(
-                        request,
-                        mark_safe(f"""Successfully reverted commits {", ".join(msgs)}"""),
-                    )
+
+                messages.success(
+                    request,
+                    mark_safe(f"""Successfully reverted commits {", ".join(msgs)}"""),
+                )
 
         return redirect(self.get_return_url(request))
 

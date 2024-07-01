@@ -298,6 +298,7 @@ fabric.properties
 # Rando
 creds.env
 development/*.txt
+nautobot_version_control/static/nautobot_version_control/docs
 
 # Invoke overrides
 invoke.yml
