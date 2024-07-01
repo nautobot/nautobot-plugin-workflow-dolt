@@ -46,7 +46,7 @@ namespace = Collection("nautobot_version_control")
 namespace.configure(
     {
         "nautobot_version_control": {
-            "nautobot_ver": "2.0.3",
+            "nautobot_ver": "2.0.6",
             "project_name": "nautobot-version-control",
             "python_ver": "3.11",
             "local": False,
@@ -54,7 +54,7 @@ namespace.configure(
             "compose_files": [
                 "docker-compose.base.yml",
                 "docker-compose.redis.yml",
-                "docker-compose.dolt-hosted.yml",
+                # "docker-compose.dolt-hosted.yml",
                 "docker-compose.dolt.yml",
                 "docker-compose.dev.yml",
             ],

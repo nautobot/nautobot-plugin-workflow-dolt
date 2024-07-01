@@ -20,7 +20,7 @@ def author_from_user(user):
 
     Note that while user.email is optional in Django, it's mandatory for Dolt.
     """
-    if user:
+    if user and user.is_authenticated:
         if user.email:
             return f"{user.username} <{user.email}>"
         # RFC 6761 defines .invalid as a reserved TLD that will never be used for real-world domains
