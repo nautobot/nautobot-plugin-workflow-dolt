@@ -54,6 +54,8 @@ class TestBranches(DoltTestCase):
 
     def tearDown(self):
         """tearDown is ran after every testcase."""
+        main = Branch.objects.get(name=self.default)
+        main.checkout()
         # Branch QuerySet deletes are not supported, delete branches individually.
         for branch in Branch.objects.exclude(name=self.default):
             branch.delete()
