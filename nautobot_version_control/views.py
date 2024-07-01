@@ -47,6 +47,7 @@ class DoltObjectView(generic.ObjectView):
         # TODO: this feels inelegant - should the tabs lookup be a dedicated endpoint rather than piggybacking
         # on the object-retrieve endpoint?
         # TODO: similar functionality probably needed in NautobotUIViewSet as well, not currently present
+        # pylint: disable=no-else-return
         if request.GET.get("viewconfig", None) == "true":
             # TODO: we shouldn't be importing a private-named function from another module. Should it be renamed?
             from nautobot.extras.templatetags.plugins import (  # pylint: disable=import-outside-toplevel  # TODO
@@ -450,6 +451,7 @@ class CommitRevertView(GetReturnURLMixin, ObjectPermissionRequiredMixin, View):
             if form.is_valid():
                 commits = form.cleaned_data["pk"]
                 msgs = [f"""<strong>"{c.short_message}"</strong>""" for c in commits]
+                # pylint: disable=no-else-return
                 try:
                     _ = Commit.revert(commits, request.user)
                 except Exception as err:  # pylint: disable=broad-except
