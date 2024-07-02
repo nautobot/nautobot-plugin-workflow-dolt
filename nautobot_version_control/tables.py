@@ -66,7 +66,7 @@ class BranchTable(BaseTable):
         """Metaclass attributes of BranchTable."""
 
         model = Branch
-        fields = (
+        fields = (  # pylint: disable=nb-use-fields-all
             "pk",
             "name",
             "hash",
@@ -106,7 +106,7 @@ class CommitTable(BaseTable):
         """Metaclass attributes of CommitTable."""
 
         model = Commit
-        fields = (
+        fields = (  # pylint: disable=nb-use-fields-all
             "pk",
             "short_message",
             "date",
@@ -117,7 +117,7 @@ class CommitTable(BaseTable):
         default_columns = fields
 
 
-class CommitRevertTable(BaseTable):
+class CommitRevertTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """CommitRevert renders the commit revert table for the commit review view."""
 
     short_message = tables.LinkColumn(verbose_name="Commit Message")
@@ -126,7 +126,7 @@ class CommitRevertTable(BaseTable):
         """Metaclass attributes of CommitRevertTable."""
 
         model = Commit
-        fields = (
+        fields = (  # pylint: disable=nb-use-fields-all
             "short_message",
             "date",
             "committer",
@@ -141,14 +141,14 @@ class CommitRevertTable(BaseTable):
 #
 
 
-class ConflictsSummaryTable(BaseTable):
+class ConflictsSummaryTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """Summary table for `Conflicts` and `ConstraintViolations`."""
 
     class Meta(BaseTable.Meta):
         """Metaclass attributes of ConflictsSummaryTable."""
 
         model = Conflicts
-        fields = ("table", "num_conflicts", "num_violations")
+        fields = ("table", "num_conflicts", "num_violations")  # pylint: disable=nb-use-fields-all
         default_columns = fields
 
 
@@ -172,7 +172,7 @@ class ConflictsTable(BaseTable):
         """Metaclass attributes of ConflictsTable."""
 
         model = Conflicts
-        fields = (
+        fields = (  # pylint: disable=nb-use-fields-all
             "model",
             "id",
             "conflicts",
@@ -180,14 +180,14 @@ class ConflictsTable(BaseTable):
         default_columns = fields
 
 
-class ConstraintViolationsTable(BaseTable):
+class ConstraintViolationsTable(BaseTable):  # pylint: disable=nb-sub-class-name
     """ConstraintViolations renders the table in the constraint violations table."""
 
     class Meta(BaseTable.Meta):
         """Metaclass attributes of ConstraintViolationsTable."""
 
         model = Conflicts
-        fields = (
+        fields = (  # pylint: disable=nb-use-fields-all
             "model",
             "id",
             "violations",
@@ -234,7 +234,7 @@ class PullRequestTable(BaseTable):
         """Metaclass attributes of PullRequestTable."""
 
         model = PullRequest
-        fields = (
+        fields = (  # pylint: disable=nb-use-fields-all
             "pk",
             "title",
             "status",
