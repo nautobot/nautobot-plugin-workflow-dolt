@@ -2,7 +2,6 @@
 
 # TODO: move these to settings?
 
-
 DB_NAME = "nautobot"
 
 GLOBAL_DB = "global"
