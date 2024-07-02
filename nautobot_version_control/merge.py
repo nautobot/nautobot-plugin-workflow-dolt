@@ -2,24 +2,22 @@
 
 import json
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.db.models import Sum
-from django.contrib.contenttypes.models import ContentType
-from django.utils.safestring import mark_safe
 
 from nautobot_version_control.models import (
     Branch,
+    Commit,
     Conflicts,
     ConstraintViolations,
-    Commit,
 )
-from nautobot_version_control.utils import author_from_user, query_on_branch
 from nautobot_version_control.tables import (
     ConflictsTable,
     ConstraintViolationsTable,
 )
-
+from nautobot_version_control.utils import author_from_user, query_on_branch
 
 # TODO: this file should be named "conflicts.py"
 
@@ -185,7 +183,7 @@ class MergeConflicts:
 
             cursor.execute(  # TODO: not safe
                 f"""SELECT base_id, JSON_OBJECT({fields})
-                    FROM dolt_conflicts_{conflict.table};"""  # nosec
+                    FROM dolt_conflicts_{conflict.table};"""  # nosec  # noqa: S608
             )
             model_name = self._model_from_table(conflict.table)
             return [
@@ -225,10 +223,8 @@ class MergeConflicts:
             rows = []
             model_name = self._model_from_table(violation.table)
             cursor.execute(  # TODO: not safe
-                mark_safe(
-                    """SELECT id, violation_type, violation_info
-                    FROM dolt_constraint_violations_{violation.table};"""
-                )
+                f"""SELECT id, violation_type, violation_info
+                FROM dolt_constraint_violations_{violation.table};"""  # nosec # noqa: S608
             )
             for v_row in cursor.fetchall():
                 obj_name = self._object_name_from_id(violation.table, v_row[0])

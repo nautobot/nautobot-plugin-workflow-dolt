@@ -1,21 +1,20 @@
 """Dolt primitives such as branches and commits as Django models."""
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, connection, connections
+from django.db import connection, connections, models
 from django.db.models import Q
 from django.db.models.deletion import CASCADE
-from django.urls import reverse
-from django.utils.html import mark_safe, format_html
-from django.dispatch import receiver
 from django.db.models.signals import pre_delete
-
+from django.dispatch import receiver
+from django.urls import reverse
+from django.utils.html import format_html
 from nautobot.core.models import BaseModel
+from nautobot.core.models.querysets import RestrictedQuerySet
 from nautobot.extras.utils import extras_features
 from nautobot.users.models import User
-from nautobot.core.models.querysets import RestrictedQuerySet
 
-from nautobot_version_control.utils import author_from_user, DoltError, db_for_commit, active_branch
 from nautobot_version_control.constants import DOLT_DEFAULT_BRANCH
+from nautobot_version_control.utils import DoltError, active_branch, author_from_user, db_for_commit
 
 
 class DoltSystemTable(models.Model):
@@ -180,8 +179,11 @@ class Branch(DoltSystemTable):  # pylint: disable=nb-incorrect-base-class  # TOD
                 raise DoltError(
                     format_html(
                         "{}",
-                        mark_safe(
-                            f"""Merging <strong>{merge_branch}</strong> into <strong>{self}</strong> created merge conflicts. Resolve merge conflicts to reattempt the merge."""
+                        format_html(
+                            "Merging <strong>{}</strong> into <strong>{}</strong> created merge conflicts. "
+                            "Resolve merge conflicts to reattempt the merge.",
+                            merge_branch,
+                            self,
                         ),
                     )
                 )
@@ -445,7 +447,7 @@ class PullRequest(BaseModel):
         return self.state == PullRequest.OPEN
 
     @property
-    def status(self):  # pylint: disable=R0911
+    def status(self):  # pylint: disable=R0911  # noqa: PLR0911
         """
         The status of a PullRequest is determined by considering both the PullRequest and its PullRequestReviews.
 

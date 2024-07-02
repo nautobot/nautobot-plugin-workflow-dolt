@@ -495,7 +495,12 @@ def dbshell(context, db_name="", input_file="", output_file="", query=""):
         f"> '{output_file}'" if output_file else "",
     ]
 
-    docker_compose(context, " ".join(command), env=env, pty=not (input_file or output_file or query))
+    docker_compose(
+        context,
+        " ".join(command),
+        env=env,
+        pty=not (input_file or output_file or query),
+    )
 
 
 @task(
@@ -520,9 +525,11 @@ def import_db(context, db_name="", input_file="dump.sql"):
             '--execute="',
             f"DROP DATABASE IF EXISTS {db_name};",
             f"CREATE DATABASE {db_name};",
-            ""
-            if db_name == "$MYSQL_DATABASE"
-            else f"GRANT ALL PRIVILEGES ON {db_name}.* TO $MYSQL_USER; FLUSH PRIVILEGES;",
+            (
+                ""
+                if db_name == "$MYSQL_DATABASE"
+                else f"GRANT ALL PRIVILEGES ON {db_name}.* TO $MYSQL_USER; FLUSH PRIVILEGES;"
+            ),
             '"',
             "&&",
             "mysql",
@@ -648,28 +655,6 @@ def generate_release_notes(context, version=""):
 # ------------------------------------------------------------------------------
 # TESTS
 # ------------------------------------------------------------------------------
-@task(
-    help={
-        "autoformat": "Apply formatting recommendations automatically, rather than failing if formatting is incorrect.",
-    }
-)
-def black(context, autoformat=False):
-    """Check Python code style with Black."""
-    if autoformat:
-        black_command = "black"
-    else:
-        black_command = "black --check --diff"
-
-    command = f"{black_command} ."
-
-    run_command(context, command)
-
-
-@task
-def flake8(context):
-    """Check for PEP8 compliance and other style issues."""
-    command = "flake8 . --config .flake8"
-    run_command(context, command)
 
 
 @task
@@ -689,26 +674,30 @@ def pylint(context):
 @task(aliases=("a",))
 def autoformat(context):
     """Run code autoformatting."""
-    black(context, autoformat=True)
     ruff(context, fix=True)
 
 
 @task(
     help={
-        "action": "One of 'lint', 'format', or 'both'",
-        "fix": "Automatically fix selected action. May not be able to fix all.",
-        "output_format": "see https://docs.astral.sh/ruff/settings/#output-format",
+        "action": "Available values are `['lint', 'format']`. Can be used multiple times. (default: `['lint']`)",
+        "fix": "Automatically fix selected actions. May not be able to fix all issues found. (default: False)",
+        "output_format": "See https://docs.astral.sh/ruff/settings/#output-format for details. (default: `full`)",
     },
+    iterable=["action"],
 )
-def ruff(context, action="lint", fix=False, output_format="text"):
+def ruff(context, action=["lint"], fix=False, output_format="full"):
     """Run ruff to perform code formatting and/or linting."""
-    if action != "lint":
+    if not action:
+        action = ["lint"]
+
+    if "format" in action:
         command = "ruff format"
         if not fix:
             command += " --check"
         command += " ."
         run_command(context, command)
-    if action != "format":
+
+    if "lint" in action:
         command = "ruff check"
         if fix:
             command += " --fix"
@@ -752,7 +741,7 @@ def check_migrations(context):
         "verbose": "Enable verbose test output.",
     }
 )
-def unittest(
+def unittest(  # noqa: PLR0913
     context,
     keepdb=True,
     label="nautobot_version_control",
@@ -803,12 +792,8 @@ def tests(context, failfast=False, keepdb=True, lint_only=False):
         print("Starting Docker Containers...")
         start(context)
     # Sorted loosely from fastest to slowest
-    print("Running black...")
-    black(context)
     print("Running ruff...")
     ruff(context)
-    print("Running flake8...")
-    flake8(context)
     print("Running bandit...")
     bandit(context)
     print("Running yamllint...")
@@ -843,11 +828,20 @@ def generate_app_config_schema(context):
     - `NautobotAppConfig.required_settings`
     """
     start(context, service="nautobot")
-    nbshell(context, file="development/app_config_schema.py", env={"APP_CONFIG_SCHEMA_COMMAND": "generate"})
+    nbshell(
+        context,
+        file="development/app_config_schema.py",
+        env={"APP_CONFIG_SCHEMA_COMMAND": "generate"},
+    )
 
 
 @task
 def validate_app_config(context):
     """Validate the app config based on the app config schema."""
     start(context, service="nautobot")
-    nbshell(context, plain=True, file="development/app_config_schema.py", env={"APP_CONFIG_SCHEMA_COMMAND": "validate"})
+    nbshell(
+        context,
+        plain=True,
+        file="development/app_config_schema.py",
+        env={"APP_CONFIG_SCHEMA_COMMAND": "validate"},
+    )

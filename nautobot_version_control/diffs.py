@@ -1,12 +1,10 @@
 """Diffs.py contains a set of utilities for producing Dolt diffs."""
 
 from django.contrib.contenttypes.models import ContentType
-from django.db import connection
-from django.db import models
+from django.db import connection, models
 from django.db.models.expressions import RawSQL
-
 from nautobot.circuits import tables as circuits_tables
-from nautobot.dcim.tables import cables, devices, devicetypes, power, racks, locations
+from nautobot.dcim.tables import cables, devices, devicetypes, locations, power, racks
 from nautobot.extras import tables as extras_tables
 from nautobot.ipam import tables as ipam_tables
 from nautobot.tenancy import tables as tenancy_tables
@@ -47,20 +45,20 @@ def two_dot_diffs(from_commit=None, to_commit=None):
         to_queryset = (
             content_type.model_class()
             .objects.filter(
-                pk__in=RawSQL(  # nosec
+                pk__in=RawSQL(  # TODO: not safe  # nosec  # noqa: S611
                     f"""SELECT to_id FROM dolt_commit_diff_{tbl_name}
                         WHERE to_commit = %s
-                        AND from_commit = %s""",  # nosec
+                        AND from_commit = %s""",  # nosec  # noqa: S608
                     (to_commit, from_commit),
                 )
             )
             .annotate(
                 # Annotate each row with a JSON-ified diff
-                diff=RawSQL(  # nosec
+                diff=RawSQL(  # TODO: not safe  # nosec  # noqa: S611
                     f"""SELECT JSON_OBJECT("root", "to", {json_diff_fields(tbl_name)})
                         FROM dolt_commit_diff_{tbl_name}
                         WHERE to_commit = %s AND from_commit = %s
-                        AND to_id = {tbl_name}.id """,  # nosec
+                        AND to_id = {tbl_name}.id """,  # nosec  # noqa: S608
                     (to_commit, from_commit),
                     output_field=models.JSONField(),
                 )
@@ -74,20 +72,20 @@ def two_dot_diffs(from_commit=None, to_commit=None):
             .objects.filter(
                 # add the `diff_type = 'removed'` clause, because we only want deleted
                 # rows in this queryset. modified rows come from the `to_queryset`
-                pk__in=RawSQL(  # nosec
+                pk__in=RawSQL(  # TODO: not safe  # nosec  # noqa: S611
                     f"""SELECT from_id FROM dolt_commit_diff_{tbl_name}
                         WHERE to_commit = %s AND from_commit = %s
-                        AND diff_type = 'removed' """,  # nosec
+                        AND diff_type = 'removed' """,  # nosec  # noqa: S608
                     (to_commit, from_commit),
                 )
             )
             .annotate(
                 # Annotate each row with a JSON-ified diff
-                diff=RawSQL(  # nosec
+                diff=RawSQL(  # TODO: not safe  # noqa: S611
                     f"""SELECT JSON_OBJECT("root", "from", {json_diff_fields(tbl_name)})
                         FROM dolt_commit_diff_{tbl_name}
                         WHERE to_commit = %s AND from_commit = %s
-                        AND from_id = {tbl_name}.id """,  # nosec
+                        AND from_id = {tbl_name}.id """,  # nosec  # noqa: S608
                     (to_commit, from_commit),
                     output_field=models.JSONField(),
                 )
@@ -121,7 +119,7 @@ def diff_summary_for_table(table, from_commit, to_commit):
         cursor.execute(  # TODO: not safe
             f"""SELECT diff_type, count(diff_type) FROM dolt_commit_diff_{table}  # nosec
                 WHERE to_commit = %s AND from_commit = %s
-                GROUP BY diff_type ORDER BY diff_type""",  # nosec
+                GROUP BY diff_type ORDER BY diff_type""",  # nosec  # noqa: S608
             (to_commit, from_commit),
         )
         for diff_type, count in cursor.fetchall():

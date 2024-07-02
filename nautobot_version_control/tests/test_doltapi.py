@@ -2,18 +2,17 @@
 
 # pylint: disable=too-many-ancestors
 
-from django.test import override_settings, TransactionTestCase
-from django.urls import reverse
 from django.db import connection
-
+from django.test import TransactionTestCase, override_settings
+from django.urls import reverse
 from nautobot.core.testing import APITestCase, APIViewTestCases
-from nautobot.users.models import User
 from nautobot.dcim.models import Manufacturer
+from nautobot.users.models import User
 
-from nautobot_version_control.models import Branch, Commit, PullRequest, PullRequestReview
-from nautobot_version_control.merge import get_conflicts_count_for_merge
-from nautobot_version_control.utils import active_branch
 from nautobot_version_control.constants import DOLT_DEFAULT_BRANCH
+from nautobot_version_control.merge import get_conflicts_count_for_merge
+from nautobot_version_control.models import Branch, Commit, PullRequest, PullRequestReview
+from nautobot_version_control.utils import active_branch
 
 
 @override_settings(DATABASE_ROUTERS=["nautobot_version_control.routers.GlobalStateRouter"])

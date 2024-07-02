@@ -2,8 +2,8 @@
 
 import django_filters
 from django.db.models import Q
-
 from nautobot.core.filters import BaseFilterSet
+
 from nautobot_version_control.models import Branch, Commit, PullRequest, PullRequestReview
 
 

@@ -1,8 +1,9 @@
 """The routers.py manages the GlobalStateRouter."""
 
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
+
 from nautobot_version_control.constants import DOLT_DEFAULT_BRANCH, GLOBAL_DB
-from nautobot_version_control.utils import DoltError, is_dolt_model, active_branch
+from nautobot_version_control.utils import DoltError, active_branch, is_dolt_model
 
 from . import is_global_router_enabled, is_versioned_model
 
@@ -49,11 +50,12 @@ class GlobalStateRouter:
         if self.branch_is_not_primary():
             # non-versioned models can only be edited on "main"
             raise DoltError(
-                mark_safe(
-                    f"""Error writing model <strong>{model.__name__}</strong>
-                        on branch <strong>"{active_branch()}"</strong>:
-                        non-versioned models must be written on branch
-                        <strong>"{DOLT_DEFAULT_BRANCH}"</strong>."""
+                format_html(
+                    'Error writing model <strong>{}</strong> on branch <strong>"{}"</strong>: '
+                    'non-versioned models must be written on branch <strong>"{}"</strong>.',
+                    model.__name__,
+                    active_branch(),
+                    DOLT_DEFAULT_BRANCH,
                 )
             )
 

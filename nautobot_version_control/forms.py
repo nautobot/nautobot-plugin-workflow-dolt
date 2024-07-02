@@ -1,14 +1,12 @@
 """Forms.py defines the set of forms used for creating, deleting, editing, and searching different models."""
 
 from django import forms
-
-from nautobot.users.models import User
 from nautobot.core.forms import BootstrapMixin, ConfirmationForm, add_blank_choice
+from nautobot.users.models import User
 
-from nautobot_version_control.models import Branch, Commit, PullRequest, PullRequestReview
-from nautobot_version_control.utils import active_branch, DoltError
 from nautobot_version_control.constants import DOLT_DEFAULT_BRANCH
-
+from nautobot_version_control.models import Branch, Commit, PullRequest, PullRequestReview
+from nautobot_version_control.utils import DoltError, active_branch
 
 #
 # Branches
